@@ -1,0 +1,119 @@
+"""Audio I/O, validation and source preparation (WAV via scipy.io.wavfile)."""
+from __future__ import annotations
+import warnings
+from math import gcd
+from pathlib import Path
+
+import numpy as np
+from scipy.io import wavfile
+from scipy.signal import resample_poly
+
+
+def read_wav(path: str | Path) -> tuple[np.ndarray, int]:
+    """Read a WAV file as mono float64 in [-1, 1]. Stereo is averaged to mono."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"Audio file not found: {path}")
+    sr, x = wavfile.read(path)
+    if x.dtype == np.int16:
+        x = x.astype(np.float64) / 32768.0
+    elif x.dtype == np.int32:
+        x = x.astype(np.float64) / 2147483648.0
+    elif x.dtype == np.uint8:
+        x = (x.astype(np.float64) - 128.0) / 128.0
+    else:
+        x = x.astype(np.float64)
+    if x.ndim == 2:
+        x = x.mean(axis=1)
+    elif x.ndim != 1:
+        raise ValueError(f"{path}: unsupported array shape {x.shape}")
+    return x, int(sr)
+
+
+def resample(x: np.ndarray, sr_in: int, sr_out: int) -> np.ndarray:
+    """Polyphase resampling to sr_out."""
+    if sr_in == sr_out:
+        return x.copy()
+    g = gcd(sr_in, sr_out)
+    return resample_poly(x, sr_out // g, sr_in // g)
+
+
+def validate_signal(x: np.ndarray, name: str = "signal", clip_frac_warn: float = 1e-3) -> dict:
+    """Check shape, NaN/inf, silence and clipping. Raises on fatal problems."""
+    x = np.asarray(x)
+    if x.ndim != 1 or x.size == 0:
+        raise ValueError(f"{name}: expected non-empty 1-D array, got shape {x.shape}")
+    if not np.all(np.isfinite(x)):
+        raise ValueError(f"{name}: contains NaN or infinity")
+    peak = float(np.max(np.abs(x)))
+    std = float(np.std(x))
+    if std < 1e-8:
+        raise ValueError(f"{name}: signal is (near) silent (std={std:.2e})")
+    clip_frac = float(np.mean(np.abs(x) >= 0.999 * peak)) if peak >= 0.999 else 0.0
+    if clip_frac > clip_frac_warn:
+        warnings.warn(f"{name}: {clip_frac:.2%} of samples at full scale - possible clipping")
+    return {"name": name, "n_samples": int(x.size), "peak": peak, "std": std, "clip_fraction": clip_frac}
+
+
+def prepare_source(x: np.ndarray, sr_in: int, sr_out: int, n_samples: int, name: str = "source") -> np.ndarray:
+    """Resample, crop to n_samples, remove DC and scale to unit variance (zero-mean, unit-RMS)."""
+    validate_signal(x, f"{name} (raw)")
+    y = resample(x, sr_in, sr_out)
+    if y.size < n_samples:
+        raise ValueError(f"{name}: only {y.size} samples after resampling, need {n_samples}")
+    y = y[:n_samples]
+    y = y - y.mean()
+    validate_signal(y, f"{name} (prepared)")
+    return y / y.std()
+
+
+def write_wav(path: str | Path, x: np.ndarray, sr: int, gain: float | None = None,
+              peak: float = 0.9) -> float:
+    """Write float signal as 16-bit PCM. If gain is None, scale to the given peak.
+
+    Returns the gain applied. This is a playback convenience only.
+    """
+    x = np.asarray(x, dtype=np.float64)
+    if not np.all(np.isfinite(x)):
+        raise ValueError(f"Refusing to write non-finite audio to {path}")
+    if gain is None:
+        m = np.max(np.abs(x))
+        if m < 1e-12:
+            raise ValueError(f"Refusing to write silent audio to {path}")
+        gain = peak / m
+    y = np.clip(x * gain, -1.0, 1.0)
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    wavfile.write(path, int(sr), np.round(y * 32767).astype(np.int16))
+    return float(gain)
+
+
+def load_sources(sources_dir: Path, names: list[str], sr: int, duration_s: float, seed: int):
+    """Load real recordings from sources_dir/<name>.wav if ALL exist; else synthetic fallback.
+
+    Returns (S, info) with S of shape (n_sources, n_samples), zero-mean, unit variance.
+    """
+    from .synthetic_audio import synth_speech, synth_music, synth_ambient
+    n = int(round(sr * duration_s))
+    real_paths = [Path(sources_dir) / f"{nm}.wav" for nm in names]
+    if all(p.is_file() for p in real_paths):
+        rows, info = [], []
+        for nm, p in zip(names, real_paths):
+            x, sr_in = read_wav(p)
+            rows.append(prepare_source(x, sr_in, sr, n, nm))
+            info.append({"name": nm, "origin": "real recording", "file": str(p), "orig_sr": sr_in,
+                         "orig_duration_s": round(len(x) / sr_in, 3)})
+        return np.vstack(rows), info
+    present = [p.name for p in real_paths if p.is_file()]
+    if present:
+        warnings.warn(f"Only some real sources present ({present}); using synthetic fallback for all.")
+    gens = {"speech": synth_speech, "music": synth_music, "ambient": synth_ambient}
+    rng = np.random.default_rng(seed)
+    rows, info = [], []
+    for nm in names:
+        if nm not in gens:
+            raise ValueError(f"No synthetic generator for source '{nm}' and real files missing")
+        x = gens[nm](sr, duration_s, rng)
+        rows.append(prepare_source(x, sr, sr, n, nm))
+        info.append({"name": nm, "origin": "SYNTHETIC (generated by src/synthetic_audio.py)",
+                     "file": None, "orig_sr": sr, "orig_duration_s": duration_s})
+    return np.vstack(rows), info

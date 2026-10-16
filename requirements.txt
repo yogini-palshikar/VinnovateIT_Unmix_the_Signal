@@ -1,0 +1,7 @@
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+# Optional: soundfile is NOT required; WAV I/O uses scipy.io.wavfile.
+# Optional for running tests / notebook:
+# pytest>=7
+# jupyter

@@ -1,0 +1,65 @@
+[
+  {
+    "file": "data\\mixtures\\mixture_1.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.7110595703125,
+    "max": 0.759735107421875
+  },
+  {
+    "file": "data\\mixtures\\mixture_2.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.612579345703125,
+    "max": 0.582000732421875
+  },
+  {
+    "file": "data\\mixtures\\mixture_3.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.949981689453125,
+    "max": 0.925994873046875
+  },
+  {
+    "file": "outputs\\separated\\separated_ambient.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.785858154296875,
+    "max": 0.89996337890625
+  },
+  {
+    "file": "outputs\\separated\\separated_music.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.699462890625,
+    "max": 0.89996337890625
+  },
+  {
+    "file": "outputs\\separated\\separated_speech.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.89996337890625,
+    "max": 0.848480224609375
+  },
+  {
+    "file": "data\\sources\\ambient_prepared.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.785308837890625,
+    "max": 0.89996337890625
+  },
+  {
+    "file": "data\\sources\\music_prepared.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.6990966796875,
+    "max": 0.89996337890625
+  },
+  {
+    "file": "data\\sources\\speech_prepared.wav",
+    "sr": 16000,
+    "duration_s": 15.0,
+    "min": -0.89996337890625,
+    "max": 0.848388671875
+  }
+]

@@ -1,0 +1,99 @@
+{
+  "synthetic_sources": false,
+  "sources": [
+    {
+      "name": "speech",
+      "origin": "real recording",
+      "file": "D:\\unmix-the-signal\\data\\sources\\speech.wav",
+      "orig_sr": 44100,
+      "orig_duration_s": 15.0
+    },
+    {
+      "name": "music",
+      "origin": "real recording",
+      "file": "D:\\unmix-the-signal\\data\\sources\\music.wav",
+      "orig_sr": 44100,
+      "orig_duration_s": 15.386
+    },
+    {
+      "name": "ambient",
+      "origin": "real recording",
+      "file": "D:\\unmix-the-signal\\data\\sources\\ambient.wav",
+      "orig_sr": 48000,
+      "orig_duration_s": 15.24
+    }
+  ],
+  "sample_rate": 16000,
+  "duration_s": 15.0,
+  "seed": 0,
+  "fastica": {
+    "max_iter": 500,
+    "tol": 1e-08,
+    "nonlinearity": "tanh",
+    "alpha": 1.0,
+    "converged": true,
+    "n_iter": 5,
+    "final_criterion": 3.1702507286013315e-10
+  },
+  "mixing": {
+    "rank": 3,
+    "condition_number": 2.9184073592125146,
+    "determinant": 0.748
+  },
+  "eigenvalues_of_covariance": [
+    2.671347034352399,
+    0.6564774093050898,
+    0.3190186037664524
+  ],
+  "whitening_max_abs_deviation_from_identity": 4.440892098500626e-15,
+  "amari_index": 0.0032915474611536024,
+  "assignment_source_to_component": [
+    2,
+    0,
+    1
+  ],
+  "summary": {
+    "mean_abs_pearson": 0.999980371076684,
+    "mean_mae": 0.003475139223404049,
+    "mean_nmse": 3.925706770147841e-05,
+    "mean_si_sdr_db": 47.65188822855345
+  },
+  "per_source": [
+    {
+      "source": "speech",
+      "component": 2,
+      "pearson": 0.999998711677744,
+      "abs_pearson": 0.999998711677744,
+      "alpha": 0.9999987116777462,
+      "mae": 0.0012401507002874278,
+      "nmse": 2.5766428507906416e-06,
+      "si_sdr_db": 55.889446559377646
+    },
+    {
+      "source": "music",
+      "component": 0,
+      "pearson": 0.9999528113755507,
+      "abs_pearson": 0.9999528113755507,
+      "alpha": 0.9999528113755506,
+      "mae": 0.00652065794255923,
+      "nmse": 9.437502213357105e-05,
+      "si_sdr_db": 40.25101945023075
+    },
+    {
+      "source": "ambient",
+      "component": 1,
+      "pearson": 0.9999895901767576,
+      "abs_pearson": 0.9999895901767576,
+      "alpha": 0.9999895901767575,
+      "mae": 0.0026646090273654893,
+      "nmse": 2.0819538120073537e-05,
+      "si_sdr_db": 46.81519867605198
+    }
+  ],
+  "versions": {
+    "python": "3.14.2",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2"
+  }
+}

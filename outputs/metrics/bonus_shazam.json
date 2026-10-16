@@ -1,0 +1,23 @@
+{
+  "clean music excerpt (sanity check)": {
+    "best_match": "main_music (synthetic)",
+    "best_score": 363,
+    "second_score": 1,
+    "score_ratio": 363.0,
+    "n_query_hashes": 392
+  },
+  "ICA-separated music component": {
+    "best_match": "main_music (synthetic)",
+    "best_score": 304,
+    "second_score": 1,
+    "score_ratio": 304.0,
+    "n_query_hashes": 384
+  },
+  "raw mixture channel 1 (no separation)": {
+    "best_match": "main_music (synthetic)",
+    "best_score": 6,
+    "second_score": 2,
+    "score_ratio": 3.0,
+    "n_query_hashes": 555
+  }
+}
